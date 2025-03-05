@@ -1,0 +1,11 @@
+body {
+    background-color: rgb(18, 172, 192);
+}
+
+.card {
+    transition: transform 0.4s;
+}
+
+.card:hover {
+    transform: translateY(-7px);
+}

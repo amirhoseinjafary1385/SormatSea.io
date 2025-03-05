@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+
+    {% extends "marketplace/base.html" %}
+    {% block content %}
+    
+
+    <div class="card">
+        <div class="row g-0">
+            <div class="col-md-6">
+                <img src="{{ nft.image.url }}" class="img-fluid rounded-start" alt="{{ nft.title }}">
+            </div>
+            <div class="col-md-6">
+                <div class="card-body">
+                    <h2 class="card-title">{{ nft.title }}</h2>
+                    <p class="card-text">{{ nft.description }}</p>
+                    <p class="card-text">Price: <span class="text-success">{{ nft.price }} ETH</span></p>
+                    <p class="card-text">Category: {{ nft.category.name }}</p>
+                    <p class="card-text">Owner: {{ nft.owner.username }}</p>
+                    <p class="card-text"><small class="text-muted">Created at: {{ nft.created_at }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {%endblock%}
+        <h1>{{ nft.title }}</h1>
+        <img src="{{ nft.image.url }}" alt="{{ nft.title }}" width="300">
+        <p>{{ nft.description }}</p>
+        <p>Price: {{ nft.price }} ETH</p>
+        <p>Category: {{ nft.category.name }}</p>
+        <p>Owner: {{ nft.owner.username }}</p>
+        <p>Created At: {{ nft.created_at }}</p>
+    </body>
+    
+
+</html>
