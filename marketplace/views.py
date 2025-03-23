@@ -5,25 +5,48 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 #from .models import CustomUser
 from .models import NFT, Category
- 
-
-
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.http import HttpResponse
+from django import forms
+from django.contrib.auth.models import User
+from .forms import RegisterForm
+
+
+
+# class RegisterForm(forms.Form):
+#     username = forms.CharField(max_length=150, label="Username")
+#     email = forms.EmailField(label="Email")
+#     password = forms.CharField(widget=forms.PasswordInput, label="Password")
+
+
+
+def category_detail(request, slug):
+    category  = get_object_or_404(Category, slug= slug)
+    return render(request, 'marketplace/category_detail.html', {'category': category})
+
+
+def nfts_view(request):
+    return render(request, 'marketplace/nfts.html')
+
 
 # ...existing code...
 
-def register(request):
+def register_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}!')
-            return redirect('nft_list')
+            # Save the user to the database
+            User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password']
+            )
+            return HttpResponse("Registration successful!")
     else:
-        form = UserCreationForm()
+        form = RegisterForm()
+
     return render(request, 'marketplace/register.html', {'form': form})
 
 
@@ -65,4 +88,4 @@ def nft_detail(request, slug):
     """
     nft = get_object_or_404(NFT, slug=slug)
     
-    return render(request, 'marketplace/nft_detail.html', {'nft': nft})    
+    return render(request, 'marketplace/nft_detail.html', {'nft': nft})

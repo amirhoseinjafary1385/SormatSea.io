@@ -12,7 +12,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
 class NFTAdmin(admin.ModelAdmin):
-    p_f = {'slug': ('title',)}
+    prepopulated_fields = {'slug': ('title',)}
 
 
 #admin.site.register(CustomUser ,CustomUserAdmin)
