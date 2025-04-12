@@ -12,6 +12,7 @@ class CustomUserAdmin(UserAdmin):
         ('Additional Info', {'fields' : ('country', 'city')}),
     )
 
+
 class NFTAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'owner', 'price', 'created_at')

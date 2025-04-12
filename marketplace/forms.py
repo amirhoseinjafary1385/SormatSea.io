@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import get_user_model
 from .models import NFT, Category
 
+
 class RegisterForm(forms.Form):
     username = forms.CharField(max_length=150, label="Username")
     firstname = forms.CharField(max_length=50, label="Firstname")
@@ -36,4 +37,6 @@ class NFTForm(forms.ModelForm):
             'category': "Category",
             'price': "Price (in ETH)"
         }
+
+
 

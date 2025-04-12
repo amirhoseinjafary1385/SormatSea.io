@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+
     path('', views.nft_list, name='nft_list'),
     path('category/<int:id>/', views.category_detail, name='category_detail'),
     path('categories', views.category_list, name='category_list'),
