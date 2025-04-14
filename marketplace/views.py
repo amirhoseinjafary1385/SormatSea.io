@@ -71,8 +71,14 @@ def verify_payment(request):
 
 
 def category_detail(request, slug):
+    
     category  = get_object_or_404(Category, slug= slug)
-    return render(request, 'marketplace/category_detail.html', {'category': category})
+    nfts = category.nft_set.all()
+
+    return render(request, 'marketplace/category_detail.html', {
+        'category': category,
+        'nfts': nfts,
+    })
 
 
 def nfts_view(request):
