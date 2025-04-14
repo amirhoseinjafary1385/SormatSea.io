@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from .forms import RegisterForm
 from django.contrib.auth import login
 from django.shortcuts import redirect
-
+from django.views.decorators.http import require_GET 
 
 
 @login_required
@@ -39,6 +39,10 @@ def initiate_payment(request, nft_id):
 def verify_payment(request):
     authority = request.GET.get('Authority')
     status = request.GET.get('Status')
+
+    if not authority or not status:
+        message.error(request, "Invalid Payment verification requet")
+        return redirect('nft_list')
 
     if status == 'OK':
         payment_manager = NFTPaymentManager()
