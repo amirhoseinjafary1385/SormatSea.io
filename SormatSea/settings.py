@@ -27,6 +27,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#Extension Bank Melli
+
+BANK_MELLI_MERCHANT_ID = 'merchant_id'
+BANK_MELLI_TERMINAL_ID = 'terminal_id'
+BANK_MELLI_API_URL = 'https://bankmelli.com/pg/services/rest/'
+BANK_MELLI_PAYMENT_URL = 'https://bankmelli.com/pg/StartPay'
+
 
 # Application definition
 
@@ -127,8 +134,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'marketplace/static']
+
 # Don't Nedd  Double Slash.
 APPEND_SLASH =  False
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

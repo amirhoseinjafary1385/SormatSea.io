@@ -1,10 +1,11 @@
 from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
-from django.db import models
 from django.conf import settings 
+# import NFT
 
 
+#Make A Transaction Method
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -46,6 +47,30 @@ class NFT(models.Model):
 
         return self.title
 
+
+
+
+class Transaction(models.Model):
+
+    nft = models.ForeignKey(NFT, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    status = models.CharField(max_length=20, choices= [
+    
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ])
+
+    payment_gateway = models.CharField(max_length=50)
+    bank_reference = models.CharField(max_length=120, blank=True)
+    bank_trace_number = models.CharField(max_length=120, blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Transaction #{self.id} for {self.nft.title}"
 
 
 

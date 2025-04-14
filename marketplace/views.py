@@ -12,6 +12,50 @@ from django.http import HttpResponse
 from django import forms
 from django.contrib.auth.models import User
 from .forms import RegisterForm
+from django.contrib.auth import login
+from django.shortcuts import redirect
+
+
+
+@login_required
+
+def initiate_payment(request, nft_id):
+    nft = get_object_or_404(NFT, pk = nft_id)
+
+    if request.method == 'post':
+        payment_manager = NFTPaymentManager()
+        result = payment_manager.process_payment(nft_id, request.user.id)
+
+        if result['success']:
+            return redirect(result['payment_url'])
+        else:
+
+            message.error(request, f"Payment initiation failed: {result['message']}")
+            return redirect('nft_detail', slug=nft.slug)
+    
+    return render(request, 'marketplace/payment_initiate.html', {'nft': nft})
+
+
+def verify_payment(request):
+    authority = request.GET.get('Authority')
+    status = request.GET.get('Status')
+
+    if status == 'OK':
+        payment_manager = NFTPaymentManager()
+        transaction = Transaction.objects.get(bank_reference = authority)
+        result = payment_manager.verify_payment(authority, transaction.amount)
+
+
+    if result['success']:
+        messages.success(request, "Payment completed successfully!")
+        return redirect('nft_detail', slug=result['nft'].slug)
+    else:
+        messages.error(request, f"Payment verification failed: {result['message']}")
+        # This else block handles the case where `result['success']` is False
+
+    messages.warning(request, "Payment was canceled by user")
+    return redirect('nft_list')
+
 
 
 
@@ -43,6 +87,9 @@ def register_view(request):
                 email=form.cleaned_data['email'],
                 password=form.cleaned_data['password']
             )
+            login(request, user)
+            return redirect('home') # redirect to a Dashboard Page
+
             return HttpResponse("Registration successful!")
     else:
         form = RegisterForm()

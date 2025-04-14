@@ -10,6 +10,16 @@
     {% block content %}
     
 
+    
+    {% if user.is_authenticated and user != nft.owner %}
+    <a href="{% url 'initiate_payment' nft_id=nft.id %}" class="btn btn-success">
+        Purchase This NFT
+    </a>
+    {% endif %}
+
+
+
+
     <div class="card">
         <div class="row g-0">
             <div class="col-md-6">

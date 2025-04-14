@@ -1,8 +1,14 @@
 from django.urls import path
 from . import views
+from marketplace import views
+
+#debug
+#print(dir(marketplace.views))
+
 
 urlpatterns = [
-
+    path('payment/initiate/', views.initiate_payment, name='initiate_payment'),
+    path('payment/verify/', views.verify_payment, name='verify_payment'),
     path('', views.nft_list, name='nft_list'),
     path('category/<int:id>/', views.category_detail, name='category_detail'),
     path('categories', views.category_list, name='category_list'),

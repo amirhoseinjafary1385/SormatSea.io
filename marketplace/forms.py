@@ -26,10 +26,12 @@ class NFTForm(forms.ModelForm):
     class Meta:
         model = NFT
         fields = ['title', 'description', 'image', 'category', 'price']
+        
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
             'image': forms.FileInput(attrs={'accept': 'image/*'})
         }
+
         labels = {
             'title': "NFT Title",
             'description': "Description",
