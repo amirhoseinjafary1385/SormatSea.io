@@ -15,8 +15,65 @@ from .forms import RegisterForm
 from django.contrib.auth import login
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET 
+from django.utils import timezone
 
 
+
+@require_GET
+def home(request):
+    """
+    Display featured NFTs + trending, top categories, and recommendations.
+    """
+    now = timezone.now()
+
+    # 1. Featured NFTs: newest 10, only those still within featured_until
+    featured_qs = NFT.objects.filter(
+        is_featured=True,
+        featured_until__gte=now
+    ).order_by('-created_at')
+
+    # Annotate how much time is left until the NFT is un-featured
+    featured_qs = featured_qs.annotate(
+        time_left=ExpressionWrapper(
+            F('featured_until') - now,
+            output_field=DurationField()
+        )
+    )
+    featured_nfts = featured_qs[:10]
+    total_featured = featured_qs.count()
+
+    # 2. Trending NFTs: top 5 by view count (you'll need a 'views' field)
+    trending_nfts = NFT.objects.order_by('-views')[:5]
+
+    # 3. Top categories by number of NFTs
+    top_categories = (
+        Category.objects
+        .annotate(num_nfts=Count('nft'))
+        .order_by('-num_nfts')[:5]
+    )
+
+    # 4. Simple “recommended” NFTs for logged-in users
+    recommended_nfts = None
+    if request.user.is_authenticated:
+        # Example: recommend newest NFTs in categories the user viewed before
+        # (You'll need a browsing-history or favorite-category relationship for real logic)
+        user_cat_ids = request.user.profile.favored_categories.values_list('id', flat=True)
+        recommended_nfts = (
+            NFT.objects
+            .filter(category__in=user_cat_ids)
+            .order_by('-created_at')[:5]
+        )
+
+    context = {
+        'featured_nfts': featured_nfts,
+        'total_featured': total_featured,
+        'trending_nfts': trending_nfts,
+        'top_categories': top_categories,
+        'recommended_nfts': recommended_nfts,
+    }
+
+    return render(request, 'marketplace/home.html', context)
+    
 @login_required
 
 def initiate_payment(request, nft_id):
@@ -139,10 +196,28 @@ def category_list(request):
     categories = Category.objects.all()
     return render(request, 'marketplace/category_list.html', {'categories': categories})
 
+
+
 def nft_detail(request, slug):
     """
-    Display the details of a specific NFT.
+    Display the details of a specific NFT, including its creator, current owner,
+    price history, related NFTs from the same category, and bidding information.
     """
+
     nft = get_object_or_404(NFT, slug=slug)
-    
+    related_nfts = NFT.objects.filter(category=nft.category).exclude(id=nft.id)[:4]
+    price_history = nft.price_history.all()
+    is_owner = request.user.is_autnticated and request.user == nft.owner
+    is_featured = nft.is_featured and nft.featured_until > timezone.now()
+    is_bidding_open = nft.bidding_end_time > timezone.now()
+
+    context = {
+        'nft': nft,
+        'related_nfts': related_nfts,
+        'price_history': price_history,
+        'is_owner': is_owner,
+        'is_featured': is_featured,
+        'is_bidding_open': is_bidding_open,
+    }
+
     return render(request, 'marketplace/nft_detail.html', {'nft': nft})
