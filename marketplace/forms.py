@@ -3,6 +3,27 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import get_user_model
 from .models import NFT, Category
 
+class BootstrapFormMixining:
+    """
+    Mixin to add Bootstrap CSS classes to form widgets:
+     - 'form-control' for text inputs, selects, textareas, etc.
+     - 'form-check-input' for checkboxes
+     - 'form-control-file' for file inputs
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            widget = field.widget
+            css_classes = widget.attrs.get('class', '').split()
+
+            if isinstance(widget, forms.CheckboxInput):
+                css_classes.append('form-check-input')
+            elif isinstance(widget, forms.FileInput):
+                css_classes.append('form-control')
+            widget.attrs['class'] = ' '.join(css_classes).strip()
+
 
 class RegisterForm(forms.Form):
     username = forms.CharField(max_length=150, label="Username")
