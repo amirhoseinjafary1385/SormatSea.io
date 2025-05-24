@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.conf import settings 
 from django.utils import timezone
 from django.core.validators import MinValueValidator
+#from .models import NFT
 
 
 class Category(models.Model):
@@ -43,6 +44,61 @@ class NFT(models.Model):
         
     def __str__(self):
         return self.title
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    items = models.ManyToManyField(NFT, through='CartItem')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Cart for {self.user.username}"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    nft = models.ForeignKey(NFT, on_delete=models.CASCADE)    
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+
+    class Meta:
+        unique_together = ('cart', 'nft')
+        ordering = ['-added_at']
+        verbose_name = "Cart Item"
+        verbose_name_plural = "Cart Items"
+        db_table = 'marketplace_cart_items'
+        indexes = [
+            models.Index(fields=['cart']),
+            models.Index(fields=['nft']),
+            models.Index(fields=['added_at']),
+            models.Index(fields=['added_at', 'cart']),
+            models.Index(fields=['updated_at']),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(quantity__gte=0),
+                name='positive_quantity'
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.quantity} x {self.nft.title}"
+
+    @property
+    def subtotal(self):
+        return self.qiuantity * self.nft.price
+        
+    @property
+    def total_price(self):
+        return self.quantity * (self.unit_price or self.nft.price)
+
+    def save(self, *args, **kwargs):
+        if not self.unit_price:
+            self.unit_price = self.nft.price
+        super().save(*args, **kwargs)
 
 
 class Transaction(models.Model):

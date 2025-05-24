@@ -1,7 +1,10 @@
 from django.urls import path
 from . import views
-
+from . import cart
 urlpatterns = [
+    path('cart/', views.cart_detail, name='cart_detail'),
+    path('cart/add/<int:nft_id>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/remove/<int:nft_id>/', views.remove_from_cart, name='remove_from_cart'),
     # home / NFT list
     path('', views.nft_list, name='nft_list'),
     # alternative “all NFTs” page

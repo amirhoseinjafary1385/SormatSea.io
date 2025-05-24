@@ -1,18 +1,33 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SormatSea - NFT Marketplace</title>
+    <title>{% block title %}SormatSea - NFT Marketplace{% endblock %}</title>
+    
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.x/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
     <!-- Glide.js CSS for carousel -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.5.0/css/glide.core.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.5.0/css/glide.theme.min.css">
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/Sormat-logo.png' %}">
     
     <style>
+        /* Sticky Footer Styles */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
         .nft-carousel {
             margin: 2rem 0;
             padding: 1rem 0;
@@ -52,14 +67,22 @@
         .glide__arrow:hover {
             background-color: rgba(0,0,0,0.8);
         }
+        
+        /* Footer Styles */
+        footer {
+            margin-top: auto;
+            background-color: #212529 !important;
+        }
     </style>
+    
+    {% block extra_css %}{% endblock %}
 </head>
-
-<body>
+<body class="d-flex flex-column h-100">
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{% url 'nft_list' %}">SormatSea.io</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -70,110 +93,178 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'category_list' %}">Category</a>
                     </li>
-                    {% if user.is_authenticated and user.is_superuser %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin">Admin</a>
+                        <a class="nav-link" href="{% url 'cart_detail' %}">Cart</a>
                     </li>
-                    <li class="nav-link">
-                        <a style="text-decoration: none; color: yellowgreen; font-size: large;" href="{% url 'register' %}">Registration_Forms</a>
-                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin">Admin</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="{% url 'register' %}">Registration Forms</a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <span class="navbar-text me-2">Welcome, {{ user.username }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- NFT Carousel Section -->
-    <div class="container-fluid nft-carousel">
-        <div class="container">
-            <h2 class="text-center text-white mb-4">Featured NFTs</h2>
-            <div class="glide">
-                <div class="glide__track" data-glide-el="track">
-                    <ul class="glide__slides">
-                        {% for nft in featured_nfts %}
-                        <li class="glide__slide nft-slide">
-                            <a href="{% url 'nft_detail' nft.id %}">
-                                <img src="{{ nft.image.url }}" alt="{{ nft.title }}" class="img-fluid">
-                                <div class="nft-info">
-                                    <div class="nft-title">{{ nft.title }}</div>
-                                    <div class="nft-price">{{ nft.price }} {{ nft.currency }}</div>
-                                </div>
-                            </a>
-                        </li>
-                        {% empty %}
-                        <li class="glide__slide nft-slide">
-                            <p class="text-white">No featured NFTs available</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="glide__arrows" data-glide-el="controls">
-                    <button class="glide__arrow glide__arrow--left" data-glide-dir="<">❮</button>
-                    <button class="glide__arrow glide__arrow--right" data-glide-dir=">">❯</button>
+    <!-- Main Content Wrapper -->
+    <div class="main-content">
+        <!-- Messages -->
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- NFT Carousel Section -->
+        {% block carousel %}
+        <div class="container-fluid nft-carousel">
+            <div class="container">
+                <h2 class="text-center text-white mb-4">Featured NFTs</h2>
+                <div class="glide">
+                    <div class="glide__track" data-glide-el="track">
+                        <ul class="glide__slides">
+                            {% for nft in featured_nfts %}
+                            <li class="glide__slide nft-slide">
+                                <a href="{% url 'nft_detail' nft.id %}">
+                                    <img src="{{ nft.image.url }}" alt="{{ nft.title }}" class="img-fluid">
+                                    <div class="nft-info">
+                                        <div class="nft-title">{{ nft.title }}</div>
+                                        <div class="nft-price">{{ nft.price }} IRT</div>
+                                    </div>
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li class="glide__slide nft-slide">
+                                <p class="text-white">No featured NFTs available</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="glide__arrows" data-glide-el="controls">
+                        <button class="glide__arrow glide__arrow--left" data-glide-dir="<" aria-label="Previous">❮</button>
+                        <button class="glide__arrow glide__arrow--right" data-glide-dir=">" aria-label="Next">❯</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="container mt-4">
-        {% block content %}
         {% endblock %}
+
+        <!-- Page Content -->
+        <div class="container mt-4 mb-4">
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p>&copy; {% now "Y" %} SormatSea.io - NFT Marketplace</p>
+    <!-- Footer - Now properly positioned -->
+    <footer class="bg-dark text-white py-4 mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">SormatSea.io</h5>
+                    <p class="mb-2">Your premier NFT marketplace for digital collectibles and art.</p>
+                    <p class="mb-0">
+                        <small class="text-muted">Discover, collect, and trade unique digital assets.</small>
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'nft_list' %}" class="text-light text-decoration-none">Browse NFTs</a></li>
+                        <li><a href="{% url 'category_list' %}" class="text-light text-decoration-none">Categories</a></li>
+                        <li><a href="{% url 'cart_detail' %}" class="text-light text-decoration-none">Cart</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Account</h6>
+                    <ul class="list-unstyled">
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'logout' %}" class="text-light text-decoration-none">Logout</a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}" class="text-light text-decoration-none">Login</a></li>
+                            <li><a href="{% url 'register' %}" class="text-light text-decoration-none">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; {% now "Y" %} SormatSea.io - NFT Marketplace. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="text-muted">Built with Django & Bootstrap</small>
+                </div>
+            </div>
         </div>
     </footer>
 
     <!-- JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.5.0/glide.min.js"></script>
     
-        <script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
-        const glideEl = document.querySelector('.glide');
-        if (!glideEl) return;
-
-        const now = new Date();  // for lazy-loading guard
-        const glide = new Glide(glideEl, {
-            type: 'carousel',
-            startAt: 0,
-            perView: 4,
-            gap: 10,
-            autoplay: 3000,
-            animationDuration: 800,
-            hoverpause: true,
-            keyboard: true,
-            breakpoints: {
-            1200: { perView: 3 },
-            992: { perView: 2 },
-            768: { perView: 1 }
-            }
-        });
-
-        glide.mount({
-            Controls: Glide.Controls,
-            Breakpoints: Glide.Breakpoints,
-            Autoplay: Glide.Autoplay,
-            Keyboard: Glide.Keyboard
-        });
-
-        // lazy-load images with data-src
-        const lazyLoad = () => {
-            glideEl.querySelectorAll('img[data-src]').forEach(img => {
-            if (!img.src) img.src = img.dataset.src;
+            const glideEl = document.querySelector('.glide');
+            if (!glideEl) return;
+            
+            const glide = new Glide(glideEl, {
+                type: 'carousel',
+                startAt: 0,
+                perView: 4,
+                gap: 10,
+                autoplay: 3000,
+                animationDuration: 800,
+                hoverpause: true,
+                keyboard: true,
+                breakpoints: {
+                    1200: { perView: 3 },
+                    992: { perView: 2 },
+                    768: { perView: 1 }
+                }
             });
-        };
-        glide.on(['mount.after', 'run'], lazyLoad);
-
-        // debug: slide change
-        glide.on('run', () => {
-            console.log(`Slide #${glide.index}`);
-        });
+            
+            glide.mount();
+            
+            // Lazy-load images with data-src
+            const lazyLoad = () => {
+                glideEl.querySelectorAll('img[data-src]').forEach(img => {
+                    if (!img.src) img.src = img.dataset.src;
+                });
+            };
+            
+            glide.on(['mount.after', 'run'], lazyLoad);
+            
+            // Debug: slide change
+            glide.on('run', () => {
+                console.log(`Slide #${glide.index}`);
+            });
         });
     </script>
-
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

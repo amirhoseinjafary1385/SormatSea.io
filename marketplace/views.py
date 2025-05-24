@@ -16,7 +16,7 @@ from django.contrib.auth import login
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET 
 from django.utils import timezone
-
+from .cart import cart_detail, add_to_cart, remove_from_cart
 
 
 @require_GET
@@ -73,7 +73,7 @@ def home(request):
     }
 
     return render(request, 'marketplace/home.html', context)
-    
+
 @login_required
 
 def initiate_payment(request, nft_id):
@@ -190,19 +190,13 @@ def nft_list(request):
 
 def category_list(request):
     
-    """
-    Display a list of all available categories.
-    """
     categories = Category.objects.all()
     return render(request, 'marketplace/category_list.html', {'categories': categories})
 
 
 
 def nft_detail(request, slug):
-    """
-    Display the details of a specific NFT, including its creator, current owner,
-    price history, related NFTs from the same category, and bidding information.
-    """
+
 
     nft = get_object_or_404(NFT, slug=slug)
     related_nfts = NFT.objects.filter(category=nft.category).exclude(id=nft.id)[:4]

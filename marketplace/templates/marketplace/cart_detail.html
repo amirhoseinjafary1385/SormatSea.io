@@ -1,0 +1,57 @@
+{% extends 'marketplace/base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">🛒 سبد خرید</h2>
+
+    {% if cart_items %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>NFT</th>
+                    <th>تعداد</th>
+                    <th>قیمت واحد</th>
+                    <th>جمع کل</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>
+                        <a href="{% url 'nft_detail' item.nft.slug %}" class="text-decoration-none">
+                            {{ item.nft.title }}
+                        </a>
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.nft.price }} {{ item.nft.currency }}</td>
+                    <td>{{ item.subtotal }} {{ item.nft.currency }}</td>
+                    <td>
+                        <a href="{% url 'add_to_cart' item.nft.id %}" class="btn btn-sm btn-success me-1">+</a>
+                        <a href="{% url 'remove_from_cart' item.nft.id %}" class="btn btn-sm btn-danger">-</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h4 class="fw-bold">💰 مجموع پرداختی: {{ total_price }} {{ cart_items.0.nft.currency }}</h4>
+        <a href="{% url 'nft_list' %}" class="btn btn-outline-primary">⬅️ ادامه خرید</a>
+        <a href="{% url 'checkout' %}" class="btn btn-primary">تسویه حساب 🧾</a>
+    </div>
+    
+    {% else %}
+    <div class="alert alert-info text-center">
+        سبد خرید شما خالی است.
+    </div>
+    <div class="text-center">
+        <a href="{% url 'nft_list' %}" class="btn btn-primary">⬅️ بازگشت به فروشگاه</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
