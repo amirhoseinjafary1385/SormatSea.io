@@ -30,7 +30,7 @@ class Category(models.Model):
 class NFT(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(upload_to='nft_images/')
+    image = models.ImageField(upload_to='nft_images/', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)

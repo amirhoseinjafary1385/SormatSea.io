@@ -121,12 +121,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [BASE_DIR / 'marketplace/static']
 
-# Don't Nedd  Double Slash.
+# Don't Need  Double Slash.
 APPEND_SLASH =  False
 
 # Default primary key field type
