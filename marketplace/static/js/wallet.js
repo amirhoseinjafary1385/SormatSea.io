@@ -445,6 +445,40 @@ function connectWallet() {
     }
 }
 
+// Optional: Expose walletManager globally for debugging or integration
+window.walletManager = walletManager;
+
+// Utility: Listen for wallet connection/disconnection events
+window.addEventListener('walletConnected', (e) => {
+    console.log('Wallet connected:', e.detail);
+    // You can trigger additional logic here, e.g., fetch user data, update UI, etc.
+});
+
+window.addEventListener('walletDisconnected', () => {
+    console.log('Wallet disconnected');
+   
+});
+
+function isWalletConnected() {
+    return walletManager && walletManager.isConnected;
+}
+
+// Utility: Helper to get current wallet address
+function getWalletAddress() {
+    return walletManager && walletManager.account;
+}
+
+// Utility: Helper to get current wallet balance
+function getWalletBalance() {
+    return walletManager && walletManager.balance;
+}
+
+function getWalletNetwork() {
+    if (!walletManager || !walletManager.chainId) return null;
+    const chainIdDecimal = parseInt(walletManager.chainId, 16);
+    return walletManager.supportedChainIds[chainIdDecimal] || 'Unknown';
+}
+
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
