@@ -1,10 +1,19 @@
 from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
-from django.conf import settings 
+from django.conf import settings
 from django.utils import timezone
 from django.core.validators import MinValueValidator
-#from .models import NFT
+
+# from .models import NFT
+
+class Subcategory(models.Model):
+    category = models.ForeignKey('marketplace.Category', on_delete=models.CASCADE, related_name='subcategories')
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 
 
 class Category(models.Model):
@@ -20,7 +29,7 @@ class Category(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
         verbose_name_plural = "Categories"
 
     def __str__(self):
@@ -28,36 +37,37 @@ class Category(models.Model):
 
 
 class NFT(models.Model):
-    title = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(upload_to='nft_images/', blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="nft_images/", blank=True, null=True)
+    price_irt = models.ForeignKey(Category, on_delete=models.CASCADE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price_polygon = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(unique=True, blank=True)
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
-        
+
     def __str__(self):
         return self.title
 
 
 class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    items = models.ManyToManyField(NFT, through='CartItem')
+    items = models.ManyToManyField(NFT, through="CartItem")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Cart for {self.user.username}"
 
+
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    nft = models.ForeignKey(NFT, on_delete=models.CASCADE)    
+    nft = models.ForeignKey(NFT, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -65,22 +75,21 @@ class CartItem(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 
     class Meta:
-        unique_together = ('cart', 'nft')
-        ordering = ['-added_at']
+        unique_together = ("cart", "nft")
+        ordering = ["-added_at"]
         verbose_name = "Cart Item"
         verbose_name_plural = "Cart Items"
-        db_table = 'marketplace_cart_items'
+        db_table = "marketplace_cart_items"
         indexes = [
-            models.Index(fields=['cart']),
-            models.Index(fields=['nft']),
-            models.Index(fields=['added_at']),
-            models.Index(fields=['added_at', 'cart']),
-            models.Index(fields=['updated_at']),
+            models.Index(fields=["cart"]),
+            models.Index(fields=["nft"]),
+            models.Index(fields=["added_at"]),
+            models.Index(fields=["added_at", "cart"]),
+            models.Index(fields=["updated_at"]),
         ]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(quantity__gte=0),
-                name='positive_quantity'
+                check=models.Q(quantity__gte=0), name="positive_quantity"
             ),
         ]
 
@@ -90,7 +99,7 @@ class CartItem(models.Model):
     @property
     def subtotal(self):
         return self.qiuantity * self.nft.price
-        
+
     @property
     def total_price(self):
         return self.quantity * (self.unit_price or self.nft.price)
@@ -103,65 +112,49 @@ class CartItem(models.Model):
 
 class Transaction(models.Model):
     TRANSACTION_TYPES = [
-        ('purchase', 'Purchase'),
-        ('bid', 'Bid'),
-        ('royalty', 'Royalty Payment'),
-        ('refund', 'Refund'),
-        ('withdrawal', 'Withdrawal'),
+        ("purchase", "Purchase"),
+        ("bid", "Bid"),
+        ("royalty", "Royalty Payment"),
+        ("refund", "Refund"),
+        ("withdrawal", "Withdrawal"),
     ]
-    
+
     PAYMENT_METHODS = [
-        ('credit_card', 'Credit Card'),
-        ('bank_transfer', 'Bank Transfer'),
-        ('crypto', 'Cryptocurrency'),
-        ('wallet', 'Digital Wallet'),
+        ("credit_card", "Credit Card"),
+        ("bank_transfer", "Bank Transfer"),
+        ("crypto", "Cryptocurrency"),
+        ("wallet", "Digital Wallet"),
     ]
-    
+
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('refunded', 'Refunded'),
-        ('disputed', 'Disputed'),
-        ('cancelled', 'Cancelled'),
+        ("pending", "Pending"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+        ("refunded", "Refunded"),
+        ("disputed", "Disputed"),
+        ("cancelled", "Cancelled"),
     ]
 
     nft = models.ForeignKey(
         NFT,
         on_delete=models.CASCADE,
-        related_name='transactions',
+        related_name="transactions",
         null=True,
-        blank=True
+        blank=True,
     )
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='transactions'
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="transactions"
     )
     amount = models.DecimalField(
-        max_digits=20,
-        decimal_places=8,
-        validators=[MinValueValidator(0)]
+        max_digits=20, decimal_places=8, validators=[MinValueValidator(0)]
     )
-    currency = models.CharField(
-        max_length=10,
-        default='IRT'
-    )
+    currency = models.CharField(max_length=10, default="IRT")
     transaction_type = models.CharField(
-        max_length=20,
-        choices=TRANSACTION_TYPES,
-        default='purchase'
+        max_length=20, choices=TRANSACTION_TYPES, default="purchase"
     )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending'
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     payment_method = models.CharField(
-        max_length=20,
-        choices=PAYMENT_METHODS,
-        blank=True,
-        null=True
+        max_length=20, choices=PAYMENT_METHODS, blank=True, null=True
     )
     payment_gateway = models.CharField(max_length=50)
     bank_reference = models.CharField(max_length=120, blank=True)
@@ -175,25 +168,25 @@ class Transaction(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['status']),
-            models.Index(fields=['user']),
-            models.Index(fields=['nft']),
-            models.Index(fields=['transaction_hash']),
-            models.Index(fields=['created_at']),
+            models.Index(fields=["status"]),
+            models.Index(fields=["user"]),
+            models.Index(fields=["nft"]),
+            models.Index(fields=["transaction_hash"]),
+            models.Index(fields=["created_at"]),
         ]
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
     def is_successful(self):
-        return self.status == 'completed'
+        return self.status == "completed"
 
     def mark_as_completed(self, save=True):
-        self.status = 'completed'
+        self.status = "completed"
         self.completed_at = timezone.now()
         if save:
             self.save()
 
     def mark_as_failed(self, error_message, save=True):
-        self.status = 'failed'
+        self.status = "failed"
         self.error_message = error_message
         if save:
             self.save()

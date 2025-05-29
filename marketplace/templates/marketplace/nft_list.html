@@ -1,34 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
+{% extends "marketplace/base.html" %}
 
-<body>
-  
-  {% extends "marketplace/base.html" %}
-  {% block content %}
-  
-<!-- 
-  <h1>NFT List</h1>
-   -->
- 
-<div class="row">
-    {% for nft in nfts %}
-    <div class="col-md-4 mb-4">
-        <div class="card">
-            <img src="{{ nft.image.url }}" class="card-img-top" alt="{{ nft.title }}">
-            <div class="card-body">
-                <h5 class="card-title">{{ nft.title }}</h5>
-                <p class="card-text">{{ nft.description|truncatechars:100 }}</p>
-                <p class="text-muted">Price: {{ nft.price }} ETH</p>
-                <a href="{% url 'nft_detail' nft.slug %}" class="btn btn-primary">View Info</a>
-            </div>
-        </div>
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">NFT List</h2>
+
+    <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ nft.image.url }}" class="card-img-top" alt="{{ nft.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ nft.name }}</h5>
+                            <p class="card-text">{{ nft.description|truncatechars:100 }}</p>
+                            <p class="text-muted">
+                                Price (IRT): {{ nft.price_irt }} <br>
+                                Price (Polygon): {{ nft.price_polygon }}
+                            </p>
+                            <a href="#" class="btn btn-primary">View Info</a>
+                        </div>
+                    </div>
+                </div>
+            <p>No NFTs available.</p>
     </div>
-    {% endfor %}
 </div>
 {% endblock %}
-</body>
-</html>

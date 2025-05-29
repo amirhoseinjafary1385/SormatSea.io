@@ -17,6 +17,48 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_GET 
 from django.utils import timezone
 from .cart import cart_detail, add_to_cart, remove_from_cart
+from .models import Subcategory
+from .models import Category
+from django.views import View
+from .forms import NFTForm
+from .forms import RegisterForm
+
+
+
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form =  RegisterForm()
+
+    return render(request, 'register.html', {'form': form})
+
+
+def create_nft(request):
+    if request.method == 'POST':
+        form = NFTForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('nft_list') #whether you want for redirecting
+    else:
+        form = NFTForm()
+    return render(request, 'create_nft.html', {'form': form})
+
+
+
+class ProductView(View):
+    def get(self, request, subcategory_id=None):
+        if subcategory_id:
+            subcategory = get_object_or_404(Subcategories, pk=subcategory_id)
+            products = subcategory.item.all()
+            return render(request, 'products.html', {'subcategory_list': products})
+        else:
+            category_list = Categories.objects.all()
+            return render(request, 'products.html', {'category_list': category_list})    
 
 
 @require_GET
@@ -182,8 +224,8 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('nft_list')
-               
 
+               
 def nft_list(request):
     nfts = NFT.objects.all()
     return render(request, 'marketplace/nft_list.html', {'nfts': nfts})
@@ -192,6 +234,12 @@ def category_list(request):
     
     categories = Category.objects.all()
     return render(request, 'marketplace/category_list.html', {'categories': categories})
+
+
+
+
+
+
 
 
 

@@ -60,9 +60,9 @@ class CustomUserAdmin(UserAdmin):
 
 
 class NFTAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'owner', 'price', 'created_at')
-    list_filter = ('category', 'created_at')
+    prepopulated_fields = {'slug': ('name',)}
+    list_display = ['name', 'image', 'price_irt', 'price_polygon']
+    list_filter = ['created_at']
     search_fields = ('title', 'description') # Searchable fields
 
 #admin.site.register(CustomUser)
