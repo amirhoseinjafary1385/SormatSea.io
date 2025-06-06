@@ -16,6 +16,7 @@ from django.contrib.auth import login
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET 
 from django.utils import timezone
+from django.db.models import F, Count, ExpressionWrapper, DurationField
 from .cart import cart_detail, add_to_cart, remove_from_cart
 from .models import Subcategory
 from .models import Category
@@ -23,6 +24,13 @@ from django.views import View
 from .forms import NFTForm
 from .forms import RegisterForm
 
+def nft_create(request):
+    if request.method == 'POST':
+        form = NFTForm(request.POST, request.FILES)
+    
+    else:
+        form = NFTForm()
+    return render(request, 'nft_create.html', {'form': form})
 
 
 def register(request):
@@ -62,12 +70,10 @@ class ProductView(View):
 
 
 @require_GET
-def home(request):
-    """
-    Display featured NFTs + trending, top categories, and recommendations.
-    """
-    now = timezone.now()
 
+def home(request):
+
+    now = timezone.now()
     # 1. Featured NFTs: newest 10, only those still within featured_until
     featured_qs = NFT.objects.filter(
         is_featured=True,
@@ -114,7 +120,7 @@ def home(request):
         'recommended_nfts': recommended_nfts,
     }
 
-    return render(request, 'marketplace/home.html', context)
+    return render(request, 'home.html', context)
 
 @login_required
 
@@ -190,12 +196,7 @@ def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            # Save the user to the database
-            User.objects.create_user(
-                username=form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password']
-            )
+            user = form.save()
             login(request, user)
             return redirect('home') # redirect to a Dashboard Page
 
@@ -234,6 +235,7 @@ def category_list(request):
     
     categories = Category.objects.all()
     return render(request, 'marketplace/category_list.html', {'categories': categories})
+
 
 
 

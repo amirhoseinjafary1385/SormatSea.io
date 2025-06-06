@@ -5,7 +5,7 @@ from .views import ProductView
 
 
 urlpatterns = [
-    path('nfts/', views.nft_list, name='nft_list'),
+    path('nft/create/', views.nft_create, name='nft_create'),
     path('create-nft', views.create_nft, name='create-nft'),
     path('products/', ProductView.as_view(), name='product-list'),
     path('products/<int:subcategory_id>/', ProductView.as_view(), name='product-by-subcategory'),

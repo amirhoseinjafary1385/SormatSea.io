@@ -253,6 +253,14 @@
         [data-theme="light"] .navbar-dark {
             background-color: #343a40 !important;
         }
+
+        /* Ensure sun icon is visible in both themes */
+        .theme-toggle .bi-sun-fill {
+            color: #ffc107 !important; /* Bright yellow for visibility */
+        }
+        [data-theme="dark"] .theme-toggle .bi-sun-fill {
+            color: #ffe066 !important; /* Lighter yellow for dark backgrounds */
+        }
     </style>
 
     
@@ -406,7 +414,7 @@
                         <a href="{% url 'nfts' %}" class="btn btn-primary">
                             <i class="bi bi-grid me-2"></i>Browse All NFTs
                         </a>
-                        <a href="#" class="btn btn-outline-light">
+                        <a href="{% url 'nft_create' %}" class="btn btn-outline-light">
                             <i class="bi bi-plus-circle me-2"></i>Create NFT
                         </a>
                     </div>

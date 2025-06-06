@@ -19,19 +19,67 @@ class BootstrapFormMixining:
                 css_classes.append('form-check-input')
             elif isinstance(widget, forms.FileInput):
                 css_classes.append('form-control')
+            else:
+                defalut_class = 'form-control'
+                css_classes.append(defalut_class)
+                
             widget.attrs['class'] = ' '.join(css_classes).strip()
 
 
-class RegisterForm(UserCreationForm):
+class RegisterForm(BootstrapFormMixining, UserCreationForm):
+    username = forms.CharField(
 
-    username = forms.CharField(max_length=150, label="Username")
-    firstname = forms.CharField(max_length=50, label="Firstname")
-    lastname = forms.CharField(max_length=50, label="Lastname")
-    email = forms.EmailField(label="Email", required=True)
-    password = forms.CharField(widget=forms.PasswordInput, label="Password")
-    country = forms.CharField(max_length=120, label= "Country | کشور")
-    city = forms.CharField(max_length= 120, label= "City | شهر")
-    user_id = forms.IntegerField(label= "ID")
+        max_length=150, 
+        label="Username",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter username'})
+    )
+    firstname = forms.CharField(
+        max_length=50, 
+        label="Firstname",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter firstname'})
+    )
+    lastname = forms.CharField(
+        max_length=50, 
+        label="Lastname",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter lastname'})
+    )
+    email = forms.EmailField(
+        label="Email", 
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email'})
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter password'}),
+        label="Password"
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm password'}),
+        label="Confirm Password"
+    )
+    country = forms.CharField(
+        max_length=120, 
+        label="Country | کشور",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter country'})
+    )
+    city = forms.CharField(
+        max_length=120, 
+        label="City | شهر",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter city'})
+    )
+    user_id = forms.IntegerField(
+        label="ID",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter ID',
+            'min': 1,
+            'max': 999999,
+            'id': 'user_id',
+            'oninput': 'calculatePrice()',
+            'onchanege': 'calculatePrice()',
+            'style': 'width: 100%;',
+            'autocomplete': 'off'
+        })
+    )
 
     class Meta:
         model = User
@@ -42,7 +90,7 @@ class LoginForm(AuthenticationForm):
     remember_me = forms.BooleanField(required = False, widget = forms.CheckboxInput())
 
     class Meta:
-        fields = ['username', 'password', 'remember_me',]
+        fields = ['username', 'password', 'remember_me', 'email', 'login_token']
 
 class NFTForm(forms.ModelForm):
 
@@ -64,6 +112,4 @@ class NFTForm(forms.ModelForm):
             'category': "Category",
             'price': "Price (in ETH)"
         }
-
-
 

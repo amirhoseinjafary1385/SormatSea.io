@@ -18,6 +18,8 @@ def add_to_cart(request, nft_id):
     cart[str_id] = cart.get(str_id, 0) + 1
 
     #Save SeSsion
+
+    request.session[setdefault(CART_SESSION_ID, {})] = cart 
     request.session[CART_SESSION_ID] = cart
     request.session.modified = True
 
@@ -38,8 +40,10 @@ def remove_from_cart(request, nft_id):
 
     return redirect('cart_detail')
 
-    # if str_id not in cart:
-    #     cart[str_id] = {'quantity': 1, 'price': str(nft.price)}
+    # Your cart is a dict mapping nft_id (as string) to quantity (int).
+    # If you want to store more info per item (like price), you could use a dict per item:
+    # cart[str_id] = {'quantity': 1, 'price': str(nft.price)}
+    # But with your current logic, you only need to store the quantity as you do now.
 
 def cart_detail(request):
 
@@ -61,6 +65,15 @@ def cart_detail(request):
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
-        #
+        'item_count': len(cart_items),
+        'cart': cart,
+        'nfts': nfts,
+        'default': 'cart_detail',
+        'title': 'Cart',
+        'description': 'Cart',
+        'keywords': 'Cart',
+        'author': 'Amirhossein',
+        'url': 'https://SormatSea.io/cart/',
+        'image': 'https://SormatSea.io/static/images/logo.png',
     }
     return render(request, 'marketplace/cart_detail.html', context)
